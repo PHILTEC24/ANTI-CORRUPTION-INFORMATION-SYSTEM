@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — ACIS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: var(--color-slate-100); }
+
+  .admin-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    background: var(--color-navy-900);
+    color: var(--color-slate-200);
+    padding: 24px 18px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar .brand {
+    color: var(--color-white);
+    padding: 0 8px 24px;
+  }
+
+  .side-nav button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: none;
+    border: none;
+    color: var(--color-slate-200);
+    padding: 12px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 4px;
+    text-align: left;
+  }
+
+  .side-nav button svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .side-nav button:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-white);
+  }
+
+  .side-nav button.active {
+    background: var(--color-gold-500);
+    color: var(--color-navy-900);
+  }
+
+  .sidebar-footer {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .sidebar-footer .admin-name {
+    color: var(--color-white);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .sidebar-footer .admin-email {
+    font-size: 0.75rem;
+    color: var(--color-slate-400);
+    margin-bottom: 12px;
+  }
+
+  .content-area {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    background: var(--color-white);
+    border-bottom: 1px solid var(--color-slate-200);
+    padding: 0 32px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar h2 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+
+  .sidebar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+  }
+
+  .sidebar-toggle span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--color-navy-900);
+    margin: 5px 0;
+  }
+
+  .dash-body {
+    padding: 32px;
+    flex: 1;
+  }
+
+  .admin-panel { display: none; }
+  .admin-panel.active { display: block; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .stat-card .stat-value {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--color-navy-900);
+    font-weight: 700;
+  }
+
+  .stat-card .stat-label {
+    font-size: 0.8rem;
+    color: var(--color-slate-400);
+    margin-top: 4px;
+  }
+
+  .panel-row {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 20px;
+  }
+
+  .breakdown-card, .actions-card {
+    padding: 24px;
+  }
+
+  .breakdown-card h3, .actions-card h3 {
+    font-size: 1rem;
+    margin-bottom: 18px;
+  }
+
+  .bar-row {
+    margin-bottom: 14px;
+  }
+
+  .bar-row-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    margin-bottom: 6px;
+    color: var(--color-slate-600);
+  }
+
+  .bar-track {
+    height: 8px;
+    background: var(--color-slate-100);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: var(--color-blue-600);
+    border-radius: 999px;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar input, .toolbar select {
+    padding: 10px 14px;
+    border: 1px solid var(--color-slate-200);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-family: var(--font-body);
+  }
+
+  .toolbar input { flex: 1; min-width: 200px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--color-white);
+    font-size: 0.87rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-slate-100);
+  }
+
+  th {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-slate-400);
+    font-weight: 600;
+  }
+
+  td select {
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-slate-200);
+    font-size: 0.82rem;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-slate-100);
+  }
+
+  #adminMap {
+    height: 480px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-slate-200);
+  }
+
+  .loading-state, .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--color-slate-400);
+    font-size: 0.9rem;
+  }
+
+  .link-cell a {
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 1000px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .panel-row { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 900px) {
+    .admin-layout { grid-template-columns: 1fr; }
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 250px;
+      transform: translateX(-100%);
+      transition: transform 0.2s ease;
+      z-index: 2000;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-toggle { display: block; }
+    .dash-body { padding: 20px; }
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 31, 61, 0.5);
+    z-index: 1500;
+  }
+
+  .sidebar-backdrop.show {
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<div class="admin-layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="brand-seal">AC</span>
+      ACIS Admin
+    </div>
+    <nav class="side-nav">
+      <button data-panel="overview" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Overview
+      </button>
+      <button data-panel="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M9 2v6h6"/></svg>
+        Reports
+      </button>
+      <button data-panel="map">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg>
+        Hotspot Map
+      </button>
+      <button data-panel="users">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+      </button>
+      <button data-panel="categories">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24H4a1 1 0 0 0-1 1v5.59a2 2 0 0 0 .59 1.41l9.58 9.58a2 2 0 0 0 2.82 0l4.6-4.6a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+        Categories
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="admin-name" id="adminName">Loading...</div>
+      <div class="admin-email" id="adminEmail"></div>
+      <button class="btn btn-outline btn-sm btn-block" id="logoutBtn" style="border-color:rgba(255,255,255,0.2); color:#fff;">Log out</button>
+    </div>
+  </aside>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="content-area">
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <h2 id="pageTitle">Overview</h2>
+      <button class="btn btn-gold btn-sm" id="exportPdfBtn">Download PDF summary</button>
+    </header>
+
+    <div class="dash-body">
+
+      <section class="admin-panel active" id="admin-overview">
+        <div class="stat-grid" id="statGrid">
+          <div class="card stat-card"><div class="stat-value">-</div><div class="stat-label">Total reports</div></div>
+        </div>
+        <div class="panel-row">
+          <div class="card breakdown-card">
+            <h3>Reports by category</h3>
+            <div id="categoryBreakdown"></div>
+          </div>
+          <div class="card actions-card">
+            <h3>Reports by status</h3>
+            <div id="statusBreakdown"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-panel" id="admin-reports">
+        <div class="toolbar">
+          <input type="text" id="reportSearch" placeholder="Search by title or category...">
+          <select id="statusFilter">
+            <option value="">All statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table id="reportsTable">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Filed by</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="reportsTableBody">
+              <tr><td colspan="6"><div class="loading-state">Loading reports...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="admin-panel" id="admin-map">
+        <div id="adminMap"></div>
+      </section>
+
+      <section class="admin-panel" id="admin-categories">
+        <div class="card" style="padding:24px; margin-bottom:24px; max-width:480px;">
+          <h3 style="font-size:1rem; margin-bottom:16px;">Add a category</h3>
+          <div class="alert alert-error" id="categoryAlert"></div>
+          <form id="categoryForm" style="display:flex; gap:10px; align-items:flex-start;">
+            <div class="field" style="flex:1; margin-bottom:0;">
+              <input type="text" id="newCategoryName" placeholder="e.g. Ballot Rigging" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+        <div class="table-wrap">
+          <table id="categoriesTable">
+            <thead>
+              <tr>
+                <th>Category name</th>
+                <th style="width:160px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="categoriesTableBody">
+              <tr><td colspan="2"><div class="loading-state">Loading categories...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="admin-panel" id="admin-users">
+        <div class="toolbar">
+          <input type="text" id="userSearch" placeholder="Search by name or email...">
+        </div>
+        <div class="table-wrap">
+          <table id="usersTable">
+            <thead>
+              <tr>
+                <th>Full name</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="4"><div class="loading-state">Loading users...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/admin-dashboard.js"></script>
+</body>
+</html>

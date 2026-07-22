@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACIS — Anti-Corruption Information System</title>
+  <meta name="description"
+    content="Report corruption securely, track its resolution, and help build a more accountable public sector.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+    rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Landing-page-specific styles */
+    .hero {
+      padding: 64px 0 96px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero .container {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--color-gold-500);
+      background: var(--color-gold-100);
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.1rem, 4vw, 3.2rem);
+      margin-bottom: 20px;
+    }
+
+    .hero p.lead {
+      font-size: 1.1rem;
+      max-width: 46ch;
+      margin-bottom: 32px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .hero-trust {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .hero-trust div strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--color-navy-900);
+    }
+
+    .hero-trust div span {
+      font-size: 0.82rem;
+      color: var(--color-slate-400);
+    }
+
+    /* Signature element: a mock "report ledger" card, standing in for a screenshot */
+    .ledger-card {
+      background: var(--color-navy-900);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .ledger-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-lg);
+      background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 18px 18px;
+      pointer-events: none;
+    }
+
+    .ledger-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .ledger-head span {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--color-slate-400);
+    }
+
+    .ledger-row {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .ledger-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .ledger-row-top strong {
+      color: var(--color-white);
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .ledger-meta {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-slate-400);
+    }
+
+    .section-header {
+      max-width: 640px;
+      margin: 0 auto 48px;
+      text-align: center;
+    }
+
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-blue-600);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      padding: 30px 26px;
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      background: var(--color-blue-100);
+      color: var(--color-blue-600);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      font-family: var(--font-display);
+      font-weight: 700;
+    }
+
+    .feature-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 0.92rem;
+      margin: 0;
+    }
+
+    .about-section {
+      background: var(--color-blue-50);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .about-steps {
+      counter-reset: step;
+    }
+
+    .about-step {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .about-step-num {
+      counter-increment: step;
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-navy-900);
+      color: var(--color-gold-500);
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .about-step-num::before {
+      content: counter(step);
+    }
+
+    .about-step h4 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .about-step p {
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .contact-section .container {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 56px;
+    }
+
+    .contact-info-item {
+      margin-bottom: 24px;
+    }
+
+    .contact-info-item span {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-slate-400);
+      margin-bottom: 4px;
+    }
+
+    .contact-info-item strong {
+      font-size: 1rem;
+      color: var(--color-navy-900);
+    }
+
+    .contact-form-card {
+      padding: 32px;
+    }
+
+    @media (max-width: 900px) {
+
+      .hero .container,
+      .about-grid,
+      .contact-section .container {
+        grid-template-columns: 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-trust {
+        gap: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand">
+        <span class="brand-seal">AC</span>
+        ACIS
+      </a>
+      <nav class="nav-links" id="navLinks">
+        <a href="#home" class="active">Home</a>
+        <a href="#features">Features</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <div class="nav-actions" id="navActions">
+          <a href="login.html" class="btn btn-outline btn-sm">Login</a>
+          <a href="register.html" class="btn btn-gold btn-sm">Register</a>
+        </div>
+      </nav>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="hero" id="home">
+      <div class="container">
+        <div>
+          <h1>Report corruption. Track what happens next.</h1>
+          <p class="lead">ACIS gives citizens a secure way to report corruption, with evidence and location, and gives
+            administrators the tools to investigate and resolve every case in the open.</p>
+          <div class="hero-actions">
+            <a href="register.html" class="btn btn-primary">Report a case</a>
+            <a href="#about" class="btn btn-outline">How it works</a>
+          </div>
+          <div class="hero-trust">
+            <div>
+              <strong>Anonymous</strong>
+              <span>reporting available</span>
+            </div>
+            <div>
+              <strong>4 stages</strong>
+              <span>from filed to resolved</span>
+            </div>
+            <div>
+              <strong>Map-based</strong>
+              <span>hotspot tracking</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ledger-card">
+          <div class="ledger-head">
+            <strong style="color:#fff; font-family:var(--font-display); font-size:0.95rem;">Recent activity</strong>
+            <span>LIVE LEDGER</span>
+          </div>
+          <div id="ledgerRows">
+            <div class="ledger-row">
+              <div class="ledger-row-top">
+                <strong>Loading...</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">What the system does</span>
+          <h2>Built for both sides of a report</h2>
+          <p>Every feature exists to move a case from "filed" to "resolved" without losing the paper trail.</p>
+        </div>
+        <div class="features-grid">
+          <div class="card feature-card">
+            <div class="feature-icon">01</div>
+            <h3>Secure reporting</h3>
+            <p>Submit a title, category, and detailed description in a guided form, with your account protected by
+              Supabase Authentication.</p>
+          </div>
+          <div class="card feature-card">
+            <div class="feature-icon">02</div>
+            <h3>Location pinning</h3>
+            <p>Drop a pin on an interactive map to show exactly where an incident occurred, helping administrators spot
+              hotspots.</p>
+          </div>
+          <div class="card feature-card">
+            <div class="feature-icon">03</div>
+            <h3>Evidence upload</h3>
+            <p>Attach images and documents directly to a report, stored securely in the cloud alongside the case file.
+            </p>
+          </div>
+          <div class="card feature-card">
+            <div class="feature-icon">04</div>
+            <h3>Anonymous submission</h3>
+            <p>Choose to file without attaching your identity to the report, while still being able to track its
+              progress.</p>
+          </div>
+          <div class="card feature-card">
+            <div class="feature-icon">05</div>
+            <h3>Status tracking</h3>
+            <p>Follow a report through Pending, Under Review, Resolved, or Rejected, so you always know where it stands.
+            </p>
+          </div>
+          <div class="card feature-card">
+            <div class="feature-icon">06</div>
+            <h3>Admin oversight</h3>
+            <p>Administrators review every case, update its status, manage user roles, and export summary reports as
+              PDF.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section about-section" id="about">
+      <div class="container">
+        <div class="about-grid">
+          <div>
+            <span class="section-eyebrow">About ACIS</span>
+            <h2>A paper trail that's hard to bury</h2>
+            <p>Corruption thrives where reports go missing or nobody follows up. ACIS keeps every case in one system,
+              visible to the person who filed it and the administrator handling it, from submission to resolution.</p>
+            <p>The goal isn't just collecting reports. It's making sure each one gets a documented outcome.</p>
+          </div>
+          <div class="about-steps">
+            <div class="about-step">
+              <div class="about-step-num"></div>
+              <div>
+                <h4>Register and log in</h4>
+                <p>Create a citizen account in minutes with Supabase-backed authentication.</p>
+              </div>
+            </div>
+            <div class="about-step">
+              <div class="about-step-num"></div>
+              <div>
+                <h4>Submit a report</h4>
+                <p>Describe the incident, pin the location, and attach evidence — anonymously if you prefer.</p>
+              </div>
+            </div>
+            <div class="about-step">
+              <div class="about-step-num"></div>
+              <div>
+                <h4>Administrator reviews it</h4>
+                <p>The case appears on the admin dashboard, alongside every other open report and hotspot.</p>
+              </div>
+            </div>
+            <div class="about-step">
+              <div class="about-step-num"></div>
+              <div>
+                <h4>Track the outcome</h4>
+                <p>Watch the status update in your dashboard as the case moves toward resolution.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="container contact-section-inner">
+        <div class="contact-section">
+          <div class="container" style="padding:0; display:grid; grid-template-columns:0.9fr 1.1fr; gap:56px;">
+            <div>
+              <span class="section-eyebrow">Get in touch</span>
+              <h2>Questions about the system?</h2>
+              <p>Reach out if you need help filing a report, want to partner with ACIS, or have feedback on the
+                platform.</p>
+              <div class="contact-info-item">
+                <span>Email</span>
+                <strong>support@acis-report.org</strong>
+              </div>
+              <div class="contact-info-item">
+                <span>Response time</span>
+                <strong>Within 2 business days</strong>
+              </div>
+              <div class="contact-info-item">
+                <span>Report emergencies</span>
+                <strong>Contact local authorities directly</strong>
+              </div>
+            </div>
+            <div class="card contact-form-card">
+              <form id="contactForm">
+                <div class="field">
+                  <label for="contactName">Full name</label>
+                  <input type="text" id="contactName" name="name" required>
+                </div>
+                <div class="field">
+                  <label for="contactEmail">Email</label>
+                  <input type="email" id="contactEmail" name="email" required>
+                </div>
+                <div class="field">
+                  <label for="contactMessage">Message</label>
+                  <textarea id="contactMessage" name="message" required></textarea>
+                </div>
+                <div class="alert alert-success" id="contactSuccess">Message received. We'll get back to you shortly.
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Send message</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="brand" style="color:#fff; margin-bottom:16px;">
+        <span class="brand-seal">AC</span>
+        ACIS
+      </div>
+      <p style="color:var(--color-slate-400); max-width:40ch;">A public reporting system for citizens and administrators
+        working toward a more accountable public sector.</p>
+      <div class="footer-bottom">© 2026 Anti-Corruption Information System. Built for public transparency.</div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    // Contact form: front-end only for now, no backend table wired yet
+    document.getElementById("contactForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      document.getElementById("contactSuccess").classList.add("visible");
+      e.target.reset();
+    });
+
+    // Swap Login/Register for Dashboard/Log out if the visitor already has a session
+    (async function reflectSessionState() {
+      const user = await getCurrentUser();
+      if (!user) return;
+
+      const profile = await getProfile(user.id);
+      const dashboardPage = profile?.role === "admin" ? "admin-dashboard.html" : "citizen-dashboard.html";
+
+      document.getElementById("navActions").innerHTML = `
+      <a href="${dashboardPage}" class="btn btn-outline btn-sm">Dashboard</a>
+      <button class="btn btn-primary btn-sm" id="navLogout">Log out</button>
+    `;
+      document.getElementById("navLogout").addEventListener("click", signOut);
+    })();
+
+    // Loads real recent activity, showing only category/status/time — never
+    // titles, descriptions, or reporter identity, to protect anonymity.
+    (async function loadRecentActivity() {
+      const container = document.getElementById("ledgerRows");
+
+      const { data, error } = await supabaseClient
+        .from("public_activity_feed")
+        .select("*")
+        .limit(5);
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = `
+        <div class="ledger-row">
+          <div class="ledger-row-top">
+            <strong>No reports filed yet</strong>
+          </div>
+          <div class="ledger-meta">Be the first to report a case</div>
+        </div>`;
+        return;
+      }
+
+      const badgeClass = {
+        Pending: "badge-pending",
+        "Under Review": "badge-review",
+        Resolved: "badge-resolved",
+        Rejected: "badge-rejected"
+      };
+
+      container.innerHTML = data
+        .map((r) => `
+        <div class="ledger-row">
+          <div class="ledger-row-top">
+            <strong>${r.category}</strong>
+            <span class="badge ${badgeClass[r.status] || "badge-pending"}">${r.status}</span>
+          </div>
+          <div class="ledger-meta">${timeAgo(r.created_at)}</div>
+        </div>`)
+        .join("");
+    })();
+
+    // Converts a timestamp into a relative "time ago" string
+    function timeAgo(dateStr) {
+      const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
+      const units = [
+        ["year", 31536000],
+        ["month", 2592000],
+        ["day", 86400],
+        ["hour", 3600],
+        ["minute", 60]
+      ];
+      for (const [label, secondsInUnit] of units) {
+        const value = Math.floor(seconds / secondsInUnit);
+        if (value >= 1) return `${value} ${label}${value > 1 ? "s" : ""} ago`;
+      }
+      return "just now";
+    }
+  </script>
+</body>
+
+</html>
